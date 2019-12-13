@@ -1,41 +1,82 @@
+import ch.bildspur.postfx.builder.*;
+import ch.bildspur.postfx.pass.*;
+import ch.bildspur.postfx.*;
+
 // Window constants
-float HEIGHT = 900;
-float WIDTH = 900;
+int HEIGHT = 900;
+int WIDTH = 900;
+
+// Scene parameters
+int sunPosX = 600;
+int sunPosY = 200;
+int sunRadius = 150;
+
+
+PGraphics terrain, sky, sun, water;
+
 
 void setup() {
     // MAKE SURE SIZE HAS THE SAME ARGUMENTS AS HEIGHT AND WIDTH
     size(900, 900, P2D);
-    background(171, 171, 206);
 
-    float r = 100;
-    float g = 140;
-    float b = 120;
+    // Create the sky
+    sky = createGraphics(WIDTH, HEIGHT, P2D);
+    sky.beginDraw();
+    drawSky(sky);
+    sky.endDraw();
 
-    drawTerrain(700, 0.5, 400, color(r*0.4, g*0.4, b*0.4));
-    drawTerrain(700, 0.5, 300, color(r*0.6, g*0.6, b*0.6));
-    drawTerrain(700, 0.5, 200, color(r*0.8, g*0.8, b*0.8));
-    drawTerrain(700, 0.5, 100, color(r, g, b));
+    // Create the sun
+    sun = createGraphics(sunRadius, sunRadius, P2D);
+    sun.beginDraw();
+    drawSun(sun, color(255, 255, 255));
+    sun.endDraw();
 
-    drawWater(700, color(80, 80, 148));
+    // Create the terrain
+    terrain = createGraphics(WIDTH, HEIGHT, P2D);
+    terrain.beginDraw();
+    drawTerrain(terrain, 700, 0.55, 300, color(197, 169, 188));
+    drawTerrain(terrain, 700, 0.55, 200, color(150, 139, 182));
+    drawTerrain(terrain, 700, 0.5, 100, color(117, 116, 176));
+    terrain.endDraw();
+
+    // Create the water
+    water = createGraphics(WIDTH, HEIGHT, P2D);
+    water.beginDraw();
+    drawWater(water, 700, color(80, 80, 148));
+    water.endDraw();
 }
 
 void draw() {
-    
+    image(sky, 0, 0);
+    image(sun, sunPosX, sunPosY);
+    image(terrain, 0, 0);
+    image(water, 0, 0);
 }
 
-void drawWater(float equator, color c) {
-    fill(c);
-    noStroke();
-    quad(0, HEIGHT, 0, equator, WIDTH, equator, WIDTH, HEIGHT);
+void drawSky(PGraphics surface) {
+    surface.fill(253, 200, 202);
+    surface.rect(0, 0, WIDTH, HEIGHT);
+}
+
+void drawSun(PGraphics surface, color c) {
+    surface.fill(c);
+    surface.noStroke();
+    surface.ellipse(sunRadius/2.0, sunRadius/2.0, sunRadius, sunRadius);
+}
+
+void drawWater(PGraphics surface, float equator, color c) {
+    surface.fill(c);
+    surface.noStroke();
+    surface.quad(0, HEIGHT, 0, equator, WIDTH, equator, WIDTH, HEIGHT);
 }
 
 void drawTerrain(
-    float equator, float roughness, float displace,
-    color c
+    PGraphics surface, float equator, float roughness, 
+    float displace, color c
     ) {
     // Choose a color for the terrain
-    fill(c);
-    noStroke();
+    surface.fill(c);
+    surface.noStroke();
     // Have array list store the heights for the terrain
     int power = round(pow(2, ceil(log(WIDTH) / log(2))));
     float[] heights = new float[power+1];
@@ -68,7 +109,7 @@ void drawTerrain(
         float x1 = steppingDistance * index;
         float x2 = steppingDistance * (index + 1);
         // Draw the quad to the screen
-        quad(x1, equator, x1, equator-h1,
+        surface.quad(x1, equator, x1, equator-h1,
              x2, equator-h2, x2, equator);
     }
 }
