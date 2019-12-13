@@ -8,28 +8,28 @@ int WIDTH = 900;
 
 // Scene parameters
 int sunPosX = 600;
-int sunPosY = 200;
+int sunPosY = 400;
 int sunRadius = 150;
 
 
-PGraphics terrain, sky, sun, water;
+// PGraphics objects
+PGraphics terrain, sky, water;
+
+// PShader objects
+PShader skyShader, sunBloomShader;
 
 
 void setup() {
     // MAKE SURE SIZE HAS THE SAME ARGUMENTS AS HEIGHT AND WIDTH
     size(900, 900, P2D);
 
+    loadShaders();
+
     // Create the sky
     sky = createGraphics(WIDTH, HEIGHT, P2D);
     sky.beginDraw();
     drawSky(sky);
     sky.endDraw();
-
-    // Create the sun
-    sun = createGraphics(sunRadius, sunRadius, P2D);
-    sun.beginDraw();
-    drawSun(sun, color(255, 255, 255));
-    sun.endDraw();
 
     // Create the terrain
     terrain = createGraphics(WIDTH, HEIGHT, P2D);
@@ -47,21 +47,36 @@ void setup() {
 }
 
 void draw() {
+    // Create the sky
+    sky.beginDraw();
+    sunPosX = mouseX;
+    sunPosY = mouseY;
+    drawSky(sky);
+    sky.endDraw();
+    
+    // Blit all of the images to the screen
     image(sky, 0, 0);
-    image(sun, sunPosX, sunPosY);
     image(terrain, 0, 0);
     image(water, 0, 0);
 }
 
 void drawSky(PGraphics surface) {
     surface.fill(253, 200, 202);
-    surface.rect(0, 0, WIDTH, HEIGHT);
-}
+    // Set the sun's position in both shaders
+    skyShader.set("sunPosX", sunPosX + sunRadius/2);
+    skyShader.set("sunPosY", HEIGHT - sunPosY - sunRadius/2);
+    skyShader.set("sunRadius", sunRadius/2);
 
-void drawSun(PGraphics surface, color c) {
-    surface.fill(c);
-    surface.noStroke();
-    surface.ellipse(sunRadius/2.0, sunRadius/2.0, sunRadius, sunRadius);
+    sunBloomShader.set("sunPosX", sunPosX + sunRadius/2);
+    sunBloomShader.set("sunPosY", HEIGHT - sunPosY - sunRadius/2);
+    sunBloomShader.set("sunRadius", sunRadius/2);
+
+    // Draw the sky gradient with the skyShader
+    surface.shader(skyShader);
+    surface.rect(0, 0, WIDTH, HEIGHT);
+    // Draw the sun bloom with the sunBloomShader
+    surface.shader(sunBloomShader);
+    surface.rect(0, 0, WIDTH, HEIGHT);
 }
 
 void drawWater(PGraphics surface, float equator, color c) {
@@ -112,4 +127,9 @@ void drawTerrain(
         surface.quad(x1, equator, x1, equator-h1,
              x2, equator-h2, x2, equator);
     }
+}
+
+void loadShaders() {
+    skyShader = loadShader("SkyFrag.glsl");
+    sunBloomShader = loadShader("SunBloomFrag.glsl");
 }
