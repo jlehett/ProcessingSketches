@@ -33,7 +33,7 @@ float fogStrength3 = 0.25;
 
 
 // PGraphics objects
-PGraphics terrain, sky, water, sun_postfx;
+PGraphics terrain, sky, water, sun_postfx, stars;
 
 // PShader objects
 PShader skyShader, sunBloomShader, sunIlluminateShader;
@@ -52,6 +52,12 @@ void setup() {
     sky.beginDraw();
     drawSky(sky);
     sky.endDraw();
+
+    // Create the stars
+    stars = createGraphics(WIDTH, HEIGHT, P2D);
+    stars.beginDraw();
+    drawStars(stars);
+    stars.endDraw();
 
     // Create the terrain
     terrain = createGraphics(WIDTH, HEIGHT, P2D);
@@ -93,13 +99,32 @@ void draw() {
     if (sunPosY <= HEIGHT / 2.0) blendMode(ADD);
     else blendMode(BLEND);
     image(sun_postfx, 0, 0);
+
+    float starOpacity = map(
+        sunPosY, 450.0, 700.0,
+        0.0, 255.0
+    );
+    starOpacity = constrain(starOpacity, 0.0, 255.0);
+    tint(255, starOpacity);
+    image(stars, 0, 0);
+    tint(255, 255);
+}
+
+void drawStars(PGraphics surface) {
+    surface.fill(255);
+    surface.noStroke();
+    for (int i = 0; i < 100; i++) {
+        float scalarSize = random(0.05, 0.15);
+        float posX = random(0, WIDTH);
+        float posY = random(0, 300);
+        star(surface, posX, posY, 5*scalarSize, 70*scalarSize, 5);
+    }
 }
 
 void applySunPostFX(PGraphics surface) {
     // Clear the surface of all postFX
     surface.clear();
     // Apply sun illumination
-    sunIlluminateShader.set("sunPosX", sunPosX);
     sunIlluminateShader.set("sunPosY", sunPosY);
     
     surface.shader(sunIlluminateShader);
@@ -233,6 +258,21 @@ void drawTerrain(
         surface.quad(x1, equator, x1, equator-h1,
              x2, equator-h2, x2, equator);
     }
+}
+
+void star(PGraphics surface, float x, float y, float radius1, float radius2, int npoints) {
+  float angle = TWO_PI / npoints;
+  float halfAngle = angle/2.0;
+  surface.beginShape();
+  for (float a = 0; a < TWO_PI; a += angle) {
+    float sx = x + cos(a) * radius2;
+    float sy = y + sin(a) * radius2;
+    surface.vertex(sx, sy);
+    sx = x + cos(a+halfAngle) * radius1;
+    sy = y + sin(a+halfAngle) * radius1;
+    surface.vertex(sx, sy);
+  }
+  surface.endShape(CLOSE);
 }
 
 void loadShaders() {

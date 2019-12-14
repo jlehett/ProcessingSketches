@@ -3,7 +3,7 @@ precision mediump float;
 precision mediump int;
 #endif
 
-uniform int sunPosX, sunPosY, sunRadius;
+uniform int sunPosY, sunRadius;
 
 float dist(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x1-x2, 2) + pow(y1-y2, 2));
@@ -17,7 +17,7 @@ void main() {
     if (sunPosY >= 450) {
         float mixValue = map(
             sunPosY, 450.0, 900.0,
-            0.0, 0.65
+            0.0, 0.85
         );
         mixValue = clamp(mixValue, 0.0, 0.65);
         gl_FragColor = vec4(0.05, 0.0, 0.175, mixValue);
