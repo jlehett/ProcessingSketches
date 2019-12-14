@@ -21,7 +21,5 @@ void main() {
     float newr = mix(r/255.0, 1.0, 1.0-mixValue);
     float newg = mix(g/255.0, 1.0, 1.0-mixValue);
     float newb = mix(b/255.0, 0.9, 1.0-mixValue);
-    //gl_FragColor = vec4(mixValue, mixValue, mixValue, 1.0);
     gl_FragColor = vec4(newr, newg, newb, 1.0);
-    //gl_FragColor = vec4(r/255.0*mixValue, g/255.0*mixValue, b/255.0*mixValue, 1.0);
 }

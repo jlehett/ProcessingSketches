@@ -21,22 +21,22 @@ int terrainMaxHeight3 = 100;
 color terrainColor1 = #832232;
 color terrainColor2 = #370031;
 color terrainColor3 = #0b0033;
-float terrainRoughness1 = 0.55;
+float terrainRoughness1 = 0.5;
 float terrainRoughness2 = 0.55;
-float terrainRoughness3 = 0.5;
+float terrainRoughness3 = 0.65;
 float fogOffset1 = -100.0;
 float fogOffset2 = -10.0;
 float fogOffset3 = 0.0;
 float fogStrength1 = 0.65;
 float fogStrength2 = 0.5;
-float fogStrength3 = 0.35;
+float fogStrength3 = 0.25;
 
 
 // PGraphics objects
-PGraphics terrain, sky, water;
+PGraphics terrain, sky, water, sun_postfx;
 
 // PShader objects
-PShader skyShader, sunBloomShader;
+PShader skyShader, sunBloomShader, sunIlluminateShader;
 PShader terrain1Shader, terrain2Shader, terrain3Shader;
 
 
@@ -62,8 +62,14 @@ void setup() {
     // Create the water
     water = createGraphics(WIDTH, HEIGHT, P2D);
     water.beginDraw();
-    drawWater(water, 700, color(80, 80, 148));
+    drawWater(water, 700, #241e4e);
     water.endDraw();
+
+    // Create the sunlight postf
+    sun_postfx = createGraphics(WIDTH, HEIGHT, P2D);
+    sun_postfx.beginDraw();
+    applySunPostFX(sun_postfx);
+    sun_postfx.endDraw();
 }
 
 void draw() {
@@ -73,11 +79,31 @@ void draw() {
     sunPosY = mouseY;
     drawSky(sky);
     sky.endDraw();
+
+    // Create the PostFX
+    sun_postfx.beginDraw();
+    applySunPostFX(sun_postfx);
+    sun_postfx.endDraw();
     
     // Blit all of the images to the screen
+    blendMode(BLEND);
     image(sky, 0, 0);
     image(terrain, 0, 0);
     image(water, 0, 0);
+    if (sunPosY <= HEIGHT / 2.0) blendMode(ADD);
+    else blendMode(BLEND);
+    image(sun_postfx, 0, 0);
+}
+
+void applySunPostFX(PGraphics surface) {
+    // Clear the surface of all postFX
+    surface.clear();
+    // Apply sun illumination
+    sunIlluminateShader.set("sunPosX", sunPosX);
+    sunIlluminateShader.set("sunPosY", sunPosY);
+    
+    surface.shader(sunIlluminateShader);
+    surface.rect(0, 0, WIDTH, HEIGHT);
 }
 
 void createTerrain(PGraphics surface) {
@@ -215,4 +241,5 @@ void loadShaders() {
     terrain1Shader = loadShader("TerrainFrag.glsl");
     terrain2Shader = loadShader("TerrainFrag.glsl");
     terrain3Shader = loadShader("TerrainFrag.glsl");
+    sunIlluminateShader = loadShader("SunIlluminateFrag.glsl");
 }
