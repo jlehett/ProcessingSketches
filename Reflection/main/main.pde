@@ -11,6 +11,12 @@ int sunPosX = 600;
 int sunPosY = 400;
 int sunRadius = 150;
 
+float sunCenterX = 450.0;
+float sunCenterY = 450.0;
+float sunSpinRadius = 450.0;
+float sunSpinSpeed = 0.005;
+float sunAngle = 0.0;
+
 color skyColor1 = #ef798a;
 color skyColor2 = #ffaf87;
 
@@ -81,10 +87,12 @@ void setup() {
 void draw() {
     // Create the sky
     sky.beginDraw();
-    sunPosX = mouseX;
-    sunPosY = mouseY;
+    sunPosX = round(sunSpinRadius * cos(sunAngle) + sunCenterX);
+    sunPosY = round(sunSpinRadius * sin(sunAngle) + sunCenterY);
     drawSky(sky);
     sky.endDraw();
+
+    sunAngle += sunSpinSpeed;
 
     // Create the PostFX
     sun_postfx.beginDraw();
