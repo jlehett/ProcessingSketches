@@ -4,6 +4,7 @@ precision mediump int;
 #endif
 
 uniform int sunPosX, sunPosY, sunRadius;
+uniform float r1, r2, g1, g2, b1, b2;
 
 float dist(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x1-x2, 2) + pow(y1-y2, 2));
@@ -22,13 +23,13 @@ void main() {
     else {
         distanceFromSun -= sunRadius;
         float mixValue = map(
-            distanceFromSun, 0.0, dist(0.0, 0.0, 300.0, 300.0),
+            distanceFromSun, 0.0, dist(0.0, 0.0, 600.0, 600.0),
             0.0, 1.0
         );
         mixValue = clamp(mixValue, 0.0, 1.0);
-        float r = mix(254.0/255.0, 255.0/255.0, 1.0-mixValue);
-        float g = mix(190.0/255.0, 240.0/255.0, 1.0-mixValue);
-        float b = mix(209.0/255.0, 218.0/255.0, 1.0-mixValue);
+        float r = mix(r1/255.0, r2/255.0, 1.0-mixValue);
+        float g = mix(g1/255.0, g2/255.0, 1.0-mixValue);
+        float b = mix(b1/255.0, b2/255.0, 1.0-mixValue);
         gl_FragColor = vec4(r, g, b, 1.0);
     }
 }
