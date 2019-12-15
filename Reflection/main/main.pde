@@ -14,8 +14,8 @@ int sunRadius = 150;
 float sunCenterX = 450.0;
 float sunCenterY = 450.0;
 float sunSpinRadius = 450.0;
-float sunSpinSpeed = 0.005;
-float sunAngle = 0.0;
+float sunSpinSpeed = 0.01;
+float sunAngle = -PI;
 
 color skyColor1 = #ef798a;
 color skyColor2 = #ffaf87;
@@ -39,11 +39,17 @@ float fogStrength3 = 0.25;
 
 
 // PGraphics objects
-PGraphics terrain, sky, water, sun_postfx, stars;
+PGraphics canvas;
+PGraphics terrain, sky, sun_postfx, stars;
 
 // PShader objects
 PShader skyShader, sunBloomShader, sunIlluminateShader;
 PShader terrain1Shader, terrain2Shader, terrain3Shader;
+
+// PostFX objects
+PostFXSupervisor supervisor;
+
+WaterPass waterPass;
 
 
 void setup() {
@@ -52,6 +58,9 @@ void setup() {
     smooth(8);
 
     loadShaders();
+    loadFX();
+
+    canvas = createGraphics(WIDTH, HEIGHT, P2D);
 
     // Create the sky
     sky = createGraphics(WIDTH, HEIGHT, P2D);
@@ -71,12 +80,6 @@ void setup() {
     createTerrain(terrain);
     terrain.endDraw();
 
-    // Create the water
-    water = createGraphics(WIDTH, HEIGHT, P2D);
-    water.beginDraw();
-    drawWater(water, 700, #241e4e);
-    water.endDraw();
-
     // Create the sunlight postf
     sun_postfx = createGraphics(WIDTH, HEIGHT, P2D);
     sun_postfx.beginDraw();
@@ -85,6 +88,9 @@ void setup() {
 }
 
 void draw() {
+    clear();
+    canvas.beginDraw();
+    canvas.clear();
     // Create the sky
     sky.beginDraw();
     sunPosX = round(sunSpinRadius * cos(sunAngle) + sunCenterX);
@@ -94,28 +100,35 @@ void draw() {
 
     sunAngle += sunSpinSpeed;
 
-    // Create the PostFX
+    // Create the sun postFX
     sun_postfx.beginDraw();
     applySunPostFX(sun_postfx);
     sun_postfx.endDraw();
     
-    // Blit all of the images to the screen
-    blendMode(BLEND);
-    image(sky, 0, 0);
-    image(terrain, 0, 0);
-    image(water, 0, 0);
-    if (sunPosY <= HEIGHT / 2.0) blendMode(ADD);
-    else blendMode(BLEND);
-    image(sun_postfx, 0, 0);
+    // Blit all of the images to the canvas
+    canvas.blendMode(BLEND);
+    canvas.tint(255, 255.0);
+    canvas.image(sky, 0, 0);
+    canvas.image(terrain, 0, 0);
+    if (sunPosY <= HEIGHT / 2.0) canvas.blendMode(ADD);
+    else canvas.blendMode(BLEND);
+    canvas.image(sun_postfx, 0, 0);
 
     float starOpacity = map(
         sunPosY, 450.0, 700.0,
         0.0, 255.0
     );
     starOpacity = constrain(starOpacity, 0.0, 255.0);
-    tint(255, starOpacity);
-    image(stars, 0, 0);
-    tint(255, 255);
+    canvas.tint(255, starOpacity);
+    canvas.image(stars, 0, 0);
+    canvas.endDraw();
+
+    //blendMode();
+    supervisor.render(canvas);
+    // Apply the water shader
+    waterPass.setUniforms();
+    supervisor.pass(waterPass);
+    supervisor.compose();
 }
 
 void drawStars(PGraphics surface) {
@@ -151,7 +164,7 @@ void createTerrain(PGraphics surface) {
         terrain1Shader.set("fogOffset", fogOffset1);
         terrain1Shader.set("fogStrength", fogStrength1);
         surface.shader(terrain1Shader);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             drawTerrain(
                 surface, terrainEquator, terrainRoughness1, terrainMaxHeight1
             );
@@ -168,7 +181,7 @@ void createTerrain(PGraphics surface) {
         terrain2Shader.set("fogOffset", fogOffset2);
         terrain2Shader.set("fogStrength", fogStrength2);
         surface.shader(terrain2Shader);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             drawTerrain(
                 surface, terrainEquator, terrainRoughness2, terrainMaxHeight2
             );
@@ -185,7 +198,7 @@ void createTerrain(PGraphics surface) {
         terrain3Shader.set("fogOffset", fogOffset3);
         terrain3Shader.set("fogStrength", fogStrength3);
         surface.shader(terrain3Shader);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             drawTerrain(
                 surface, terrainEquator, terrainRoughness3, terrainMaxHeight3
             );
@@ -217,12 +230,6 @@ void drawSky(PGraphics surface) {
     // Draw the sun bloom with the sunBloomShader
     surface.shader(sunBloomShader);
     surface.rect(0, 0, WIDTH, HEIGHT);
-}
-
-void drawWater(PGraphics surface, float equator, color c) {
-    surface.fill(c);
-    surface.noStroke();
-    surface.quad(0, HEIGHT, 0, equator, WIDTH, equator, WIDTH, HEIGHT);
 }
 
 void drawTerrain(
@@ -290,4 +297,11 @@ void loadShaders() {
     terrain2Shader = loadShader("TerrainFrag.glsl");
     terrain3Shader = loadShader("TerrainFrag.glsl");
     sunIlluminateShader = loadShader("SunIlluminateFrag.glsl");
+}
+
+void loadFX() {
+    // Load supervisor
+    supervisor = new PostFXSupervisor(this);
+    // Load water pass
+    waterPass = new WaterPass();
 }
