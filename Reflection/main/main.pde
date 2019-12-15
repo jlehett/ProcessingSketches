@@ -3,42 +3,43 @@ import ch.bildspur.postfx.pass.*;
 import ch.bildspur.postfx.*;
 
 // Timers
+float time = 0.0;
 float waterTimer = 0.0;
 
 // Window constants
-int HEIGHT = 900;
-int WIDTH = 900;
+int HEIGHT = 1200;
+int WIDTH = 1200;
 
 // Scene parameters
 int sunPosX = 600;
-int sunPosY = 400;
-int sunRadius = 150;
+int sunPosY = 600;
+int sunRadius = 100;
 
-float sunCenterX = 450.0;
-float sunCenterY = 450.0;
-float sunSpinRadius = 450.0;
-float sunSpinSpeed = 0.02;
+float sunCenterX = WIDTH/2.0-25;
+float sunCenterY = HEIGHT/2.0;
+float sunSpinRadius = WIDTH/2.0;
+float sunSpinSpeed = 0.01;
 float sunAngle = -PI;
 
-color skyColor1 = #ef798a;
-color skyColor2 = #ffaf87;
+color skyColor1 = color(88, 171, 225);
+color skyColor2 = color(250, 245, 236);
 
-int terrainEquator = 700;
-int terrainMaxHeight1 = 300;
+int terrainEquator = 900;
+int terrainMaxHeight1 = 450;
 int terrainMaxHeight2 = 200;
 int terrainMaxHeight3 = 100;
-color terrainColor1 = #832232;
-color terrainColor2 = #370031;
-color terrainColor3 = #0b0033;
-float terrainRoughness1 = 0.5;
-float terrainRoughness2 = 0.55;
+color terrainColor1 = color(98, 114, 128);
+color terrainColor2 = color(124, 118, 56);
+color terrainColor3 = color(132, 126, 114);
+float terrainRoughness1 = 0.55;
+float terrainRoughness2 = 0.75;
 float terrainRoughness3 = 0.65;
-float fogOffset1 = -100.0;
-float fogOffset2 = -10.0;
-float fogOffset3 = 0.0;
+float fogOffset1 = -120.0;
+float fogOffset2 = -50.0;
+float fogOffset3 = 100.0;
 float fogStrength1 = 0.65;
 float fogStrength2 = 0.5;
-float fogStrength3 = 0.25;
+float fogStrength3 = 0.15;
 
 float waterSpeed = 0.005;
 float waterSmoothness = 0.05;
@@ -61,7 +62,7 @@ WaterPass waterPass;
 
 void setup() {
     // MAKE SURE SIZE HAS THE SAME ARGUMENTS AS HEIGHT AND WIDTH
-    size(900, 900, P2D);
+    size(1200, 1200, P2D);
     smooth(8);
 
     loadShaders();
@@ -117,17 +118,6 @@ void draw() {
     canvas.tint(255, 255.0);
     canvas.image(sky, 0, 0);
     canvas.image(terrain, 0, 0);
-    if (sunPosY <= HEIGHT / 2.0) canvas.blendMode(ADD);
-    else canvas.blendMode(BLEND);
-    canvas.image(sun_postfx, 0, 0);
-
-    float starOpacity = map(
-        sunPosY, 450.0, 700.0,
-        0.0, 255.0
-    );
-    starOpacity = constrain(starOpacity, 0.0, 255.0);
-    canvas.tint(255, starOpacity);
-    //canvas.image(stars, 0, 0);
     canvas.endDraw();
 
     //blendMode();
@@ -136,6 +126,15 @@ void draw() {
     waterPass.setUniforms();
     supervisor.pass(waterPass);
     supervisor.compose();
+
+    if (sunPosY <= HEIGHT / 2.0) blendMode(ADD);
+    else blendMode(BLEND);
+    image(sun_postfx, 0, 0);
+
+    time += 1.0;
+    if (sunAngle <= -PI + 2.0 * PI) {
+        //saveFrame("./output/######.png");
+    } //else background(0);
 }
 
 void drawStars(PGraphics surface) {
@@ -188,7 +187,7 @@ void createTerrain(PGraphics surface) {
         terrain2Shader.set("fogOffset", fogOffset2);
         terrain2Shader.set("fogStrength", fogStrength2);
         surface.shader(terrain2Shader);
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 6; i++) {
             drawTerrain(
                 surface, terrainEquator, terrainRoughness2, terrainMaxHeight2
             );

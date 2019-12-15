@@ -119,9 +119,9 @@ void main() {
     if (gl_FragCoord.y <= equator) {
         color = getReflection();
         color = vec4(
-        mix(color.r, 0.05, 0.5),
-        mix(color.g, 0.05, 0.5),
-        mix(color.b, 0.20, 0.5),
+        mix(color.r, 0.30, 0.5),
+        mix(color.g, 0.50, 0.5),
+        mix(color.b, 0.8, 0.5),
         1.0
     );
     } else {
