@@ -16,16 +16,16 @@ float map(float x, float in_min, float in_max, float out_min, float out_max) {
 void main() {
     if (sunPosY >= 450) {
         float mixValue = map(
-            sunPosY, 450.0, 800.0,
-            0.0, 0.85
+            sunPosY, 450.0, 900.0,
+            0.0, 0.65
         );
-        mixValue = clamp(mixValue, 0.0, 0.85);
+        mixValue = clamp(mixValue, 0.0, 0.65);
         gl_FragColor = vec4(0.05, 0.0, 0.175, mixValue);
     }
     else {
         float mixValue = map(
             sunPosY, 0.0, 450.0,
-            0.25, 0.0
+            0.15, 0.0
         );
         mixValue = clamp(mixValue, 0.0, 1.0);
         gl_FragColor = vec4(mixValue, mixValue, mixValue, 1.0);

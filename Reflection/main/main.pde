@@ -2,6 +2,9 @@ import ch.bildspur.postfx.builder.*;
 import ch.bildspur.postfx.pass.*;
 import ch.bildspur.postfx.*;
 
+// Timers
+float waterTimer = 0.0;
+
 // Window constants
 int HEIGHT = 900;
 int WIDTH = 900;
@@ -14,7 +17,7 @@ int sunRadius = 150;
 float sunCenterX = 450.0;
 float sunCenterY = 450.0;
 float sunSpinRadius = 450.0;
-float sunSpinSpeed = 0.01;
+float sunSpinSpeed = 0.02;
 float sunAngle = -PI;
 
 color skyColor1 = #ef798a;
@@ -36,6 +39,10 @@ float fogOffset3 = 0.0;
 float fogStrength1 = 0.65;
 float fogStrength2 = 0.5;
 float fogStrength3 = 0.25;
+
+float waterSpeed = 0.005;
+float waterSmoothness = 0.05;
+float waterMagnitude = 50.0;
 
 
 // PGraphics objects
@@ -120,7 +127,7 @@ void draw() {
     );
     starOpacity = constrain(starOpacity, 0.0, 255.0);
     canvas.tint(255, starOpacity);
-    canvas.image(stars, 0, 0);
+    //canvas.image(stars, 0, 0);
     canvas.endDraw();
 
     //blendMode();

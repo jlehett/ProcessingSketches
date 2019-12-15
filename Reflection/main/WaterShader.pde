@@ -9,6 +9,11 @@ class WaterPass implements Pass {
         shader.set("equator", HEIGHT-terrainEquator);
         shader.set("resY", HEIGHT);
         shader.set("resX", WIDTH);
+        shader.set("timer", waterTimer);
+        shader.set("smoothness", waterSmoothness);
+        shader.set("magnitude", waterMagnitude);
+
+        waterTimer += waterSpeed;
     }
 
     @Override
