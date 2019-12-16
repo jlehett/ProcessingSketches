@@ -1,14 +1,24 @@
 
 // Set up variables for texture images
-PImage image1, image2, image3;
+String[] imageFiles = {
+    "textures/tile.jpg",
+    "textures/red.jpg",
+    "textures/marble.jpg",
+    "textures/gray.jpg"
+};
+PImage[] images;
 // Set up variables for texture pgrahics objects
-PGraphics g1, g2, g3;
+PGraphics[] g;
 
 // Set up variables for texture stencils
-PGraphics s1, s2, s3;
+PGraphics[] s;
 
 // Set up variables for shaders
 PShader textureStencil;
+
+// Scene Parameters
+int numTextures = 4;
+int numStencils = 8;
 
 float time = 0.0;
 
@@ -16,27 +26,13 @@ void setup() {
     // Make sure that the arguments to size are the same as WIDTH & HEIGHT
     size(1000, 1000, P2D);
 
+    noSmooth();
+
     // Setup textures for shader
-    image1 = loadImage("textures/red.jpg");
-    g1 = createGraphics(image1.width, image1.height, P2D);
-    g1.beginDraw();
-    g1.image(image1, 0, 0);
-    g1.endDraw();
-    image2 = loadImage("textures/gray.jpg");
-    g2 = createGraphics(image2.width, image2.height, P2D);
-    g2.beginDraw();
-    g2.image(image2, 0, 0);
-    g2.endDraw();
-    image3 = loadImage("textures/marble.jpg");
-    g3 = createGraphics(image3.width, image3.height, P2D);
-    g3.beginDraw();
-    g3.image(image3, 0, 0);
-    g3.endDraw();
+    loadTextures();
 
     // Setup texture stencils
-    s1 = createGraphics(width, height, P2D);
-    s2 = createGraphics(width, height, P2D);
-    s3 = createGraphics(width, height, P2D);
+    setupStencilObjects();
 
     // Load the shaders
     loadShaders();
@@ -45,6 +41,9 @@ void setup() {
 void draw() {
     renderStencils();
     renderWhole();
+
+    if (time <= 0.005*60.0*7.0) saveFrame("./output/######.png");
+    else background(0);
 }
 
 void renderWhole() {
@@ -55,54 +54,60 @@ void renderWhole() {
 }
 
 void renderStencils() {
-    time += 0.01;
-    // Draw in patterns for the stencils. Stencils should consist only
-    // of black and white pixels.
-    {
-        // Render s1
-        s1.beginDraw();
-        s1.background(255);
-        s1.fill(0);
-        s1.ellipse(
-            width/2 + noise(time+25.0) * 100.0 - 50.0, 
-            height/2 + noise(time-50.0) * 100.0 - 50.0, 
-            500, 500);
-        s1.endDraw();
+    time += 0.005;
 
-        // Render s2
-        s2.beginDraw();
-        s2.background(255);
-        s2.fill(0);
-        s2.ellipse(
-            width/2 + noise(time+50.0) * 300.0 - 150.0, 
-            height/2 + noise(time+16.0) * 300.0 - 150.0, 
-            300, 300);
-        s2.endDraw();
+    for (int i = 0; i < numStencils; i++) {
+        float thisTime = time + 20.0 * i;
 
-        // Render s3
-        s3.beginDraw();
-        s3.background(255);
-        s3.fill(0);
-        s3.ellipse(
-            width/2 + noise(time - 16.0) * 500.0 - 250.0, 
-            height/2 + noise(time - 28.0) * 500.0 - 250.0, 
-            100, 100);
-        s3.endDraw();
+        s[i].beginDraw();
+        s[i].background(255);
+        s[i].fill(0);
+
+        s[i].arc(width/2, height/2, 800.0-i*100.0, 800.0-i*100.0,
+                noise(thisTime) * 10.0 - 5.0, 
+                PI*3.0/2.0 + noise(thisTime) * 10.0 - 5.0);
+        s[i].fill(255);
+        s[i].ellipse(width/2, height/2, 800.0-i*100.0-100.0, 800.0-i*100.0-100.0);
+        
+        s[i].endDraw();
     }
 }
 
 void loadShaders() {
     // Load the texture stencil shader and set its uniforms
     textureStencil = loadShader("shaders/StencilFrag.glsl");
-    
-    textureStencil.set("t1", g1);
-    textureStencil.set("t2", g2);
-    textureStencil.set("t3", g3);
 
-    textureStencil.set("s1", s1);
-    textureStencil.set("s2", s2);
-    textureStencil.set("s3", s3);
+    for (int i=0; i < numTextures; i++) {
+        String textureUniformName = "t" + str(i+1);
+        textureStencil.set(textureUniformName, g[i]);
+    }
+    for (int i=0; i < numStencils; i++) {
+        String stencilUniformName = "s" + str(i+1);
+        textureStencil.set(stencilUniformName, s[i]);
+    }
 
     textureStencil.set("resX", width);
     textureStencil.set("resY", height);
+}
+
+void loadTextures() {
+    // Load the images into textures
+    images = new PImage[numTextures];
+    g = new PGraphics[numTextures];
+    for (int i = 0; i < numTextures; i++) {
+        println(imageFiles[i]);
+        images[i] = loadImage(imageFiles[i]);
+        g[i] = createGraphics(images[i].width, images[i].height, P2D);
+        g[i].beginDraw();
+        g[i].image(images[i], 0, 0);
+        g[i].endDraw();
+    }
+}
+
+void setupStencilObjects() {
+    // Create PGraphics objects for each stencil
+    s = new PGraphics[numStencils];
+    for (int i = 0; i < numStencils; i++) {
+        s[i] = createGraphics(width, height, P2D);
+    }
 }
