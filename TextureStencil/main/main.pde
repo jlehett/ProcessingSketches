@@ -1,9 +1,9 @@
 
 // Set up variables for texture images
 String[] imageFiles = {
-    "textures/tile.jpg",
     "textures/red.jpg",
     "textures/marble.jpg",
+    "textures/tile.jpg",
     "textures/gray.jpg"
 };
 PImage[] images;
@@ -42,7 +42,7 @@ void draw() {
     renderStencils();
     renderWhole();
 
-    if (time <= 0.005*60.0*7.0) saveFrame("./output/######.png");
+    if (time <= 0.02*60.0*7.0) saveFrame("./output/######.png");
     else background(0);
 }
 
@@ -54,18 +54,18 @@ void renderWhole() {
 }
 
 void renderStencils() {
-    time += 0.005;
+    time += 0.02;
 
     for (int i = 0; i < numStencils; i++) {
-        float thisTime = time + 20.0 * i;
+        float thisTime = time + 57.0 * i;
 
         s[i].beginDraw();
         s[i].background(255);
         s[i].fill(0);
 
         s[i].arc(width/2, height/2, 800.0-i*100.0, 800.0-i*100.0,
-                noise(thisTime) * 10.0 - 5.0, 
-                PI*3.0/2.0 + noise(thisTime) * 10.0 - 5.0);
+                thisTime * 10.0, 
+                PI*3.0/2.0 + thisTime * 10.0);
         s[i].fill(255);
         s[i].ellipse(width/2, height/2, 800.0-i*100.0-100.0, 800.0-i*100.0-100.0);
         
