@@ -1,8 +1,8 @@
 
 // Global parameters
 
-float MIN_VEL = 1.0;
-float MAX_VEL = 100.0;
+float MIN_VEL = 0.1;
+float MAX_VEL = 2.0;
 
 // Circle class
 
@@ -40,12 +40,13 @@ class Circle {
         else return false;
     }
 
-    public void drawCircle() {
+    public void drawCircle(PGraphics surface) {
         // Draw the circle at its specified coordinates
-        stroke(255, 255, 255, 50);
-        noFill();
-        strokeWeight(1);
-        ellipse(this.position.x, this.position.y, 
+        surface.stroke(255, 255, 255, 255/2.0);
+        surface.noFill();
+        surface.strokeWeight(15);
+        surface.fill(255, 255, 255, 255/3.0);
+        surface.ellipse(this.position.x, this.position.y, 
                 this.radius*2, this.radius*2);
     }
 
