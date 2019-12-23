@@ -22,3 +22,5 @@ In the example shown in the image above, concentric arcs are being drawn via reg
 stencils. These arcs are being rotated to certain angles using perlin noise as a function of time. The stencils are being passed
 each frame to the shader code as uniforms, and the final rendered image is produced using the shader code to mark where certain
 textures should be showing.
+
+### [Back to Home](https://github.com/jlehett/ProcessingSketches)
